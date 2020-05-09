@@ -1,11 +1,15 @@
 <?php
-//imprimir en pantalla las variables que recibimos desde el formulario
-//print_r($_POST);
+/*imprimir en pantalla las variables que recibimos desde el formulario
+print_r($_POST);*/
 
-$mensaje = '';
+//error_reporting(E_ALL);
+//ini_set('display_errors', '1');
+require ('datos.php');
+require ('procesa.php');
+//$mensaje = '';
 
 //verificar que los datos del formulario se hayan enviado via post
-if (isset($_POST['enviar']) && $_POST['enviar'] == 'si') {
+/*if (isset($_POST['enviar']) && $_POST['enviar'] == 'si') {
 	//print_r($_POST);
 	//recuperar los datos del formulario
 	$nombre = $_POST['nombre'];
@@ -23,22 +27,60 @@ if (isset($_POST['enviar']) && $_POST['enviar'] == 'si') {
 	}elseif (!$asunto) {
 		$mensaje = 'Indique un asunto';
 	}elseif (!$comentario) {
-		$mensaje = 'Ingrese un comentario';
+		$mensaje = 'Ingrese un comentario';*/
+
+$procesa = new Procesa();
+
+if (isset($_POST['enviar']) && $_POST['enviar'] == 'si') {
+
+
+	$nombre = strip_tags($_POST['nombre']);
+	$teléfono = $_POST['teléfono'];
+	$email = $_POST['email'];
+	$asunto = $_POST['asunto'];
+	$ejecutivo = $_POST['ejecutivo'];
+	$comentario = $_POST['comentario'];
+
+	if (!$nombre) {
+		$mensaje = 'Ingresa tu nombre';
+	}elseif(!$teléfono){
+		$mensaje = 'Ingrese su teléfono';
+	}elseif(!filter_var($email, FILTER_VALIDATE_EMAIL)){
+		$mensaje = 'El email no es válido';
+	}elseif(!$asunto){
+		$mensaje = 'Seleccione asunto';
+	}elseif(!$ejecutivo){
+		$mensaje = 'Seleccione un ejecutivo';
+	}elseif(!$comentario){
+		$mensaje = 'Ingrese comentario';
 	}else{
+		$procesa->setNombre($nombre);
+		$procesa->setTeléfono($teléfono);
+		$procesa->setEmail($email);
+		$procesa->setAsunto($asunto);
+		$procesa->setEjecutivo($ejecutivo);
+		$procesa->setComentario($comentario);
+
+		echo $procesa->getNombre();
+		echo $procesa->getTeléfono();
+		echo $procesa->getEmail();
+		echo $procesa->getAsunto();
+		echo $procesa->getEjecutivo();
+		echo $procesa->getComentario();
+	}/*
+	else{
 		//$m = 'Gracias por escribirnos, pronto nos comunicaremos con usted';
 		header('Location: saludo.php?nombre=' . $nombre);
-	}
-
-}else{
-	$mensaje = 'Los datos no han sido enviados correctamente';
+	}*/
 }
 
 ?>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
 	<meta charset="UTF-8">
-	<title>UNIDAD STC. HOME</title>
+	<title>UNIDAD STC. CONTÁCTENOS</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 	<meta http-equiv="x-ua-compatible" content="ie-edge">
 	<link rel="stylesheet" type="text/css" href="css/reset.css">
@@ -136,11 +178,10 @@ if (isset($_POST['enviar']) && $_POST['enviar'] == 'si') {
 				<div class="col-12 col-sm-12 col-md-4 col-lg-8 col-xl-8">
 					<img src="img/correo.png" alt="" style="float: right; width: 15%">
 						
-					<p style="font-weight: bold">FORMULARIO DE CONTACTO</p>
-					<?php if($mensaje): ?>
-
-						<p class="alert alert-danger" style="width: 50%"><?php echo $mensaje; ?></p>
-					<?php endif;?>
+					<h3 style="font-weight: bold">FORMULARIO DE CONTACTO</h3>
+					<?php if(isset($mensaje)): ?>
+						<p class="alert alert-danger"><?php echo $mensaje; ?></p>
+					<?php endif; ?>
 					<form action="" method="post">
 						<div class="form-group">
 							<label for="nombre">Nombre</label>
@@ -154,15 +195,22 @@ if (isset($_POST['enviar']) && $_POST['enviar'] == 'si') {
 						           aria-describedby="emailHelp" placeholder="Ingrese correo Electrónico"style="width: 50%" value="<?php echo @($email); ?>"><br>
 						    <label>Seleccione un asunto:</label><br>
 									<select name="asunto" class="form-control" style="width: 50%">
-									<option value="">Seleccione...</option>
-									<option value="1">Consultas Generales</option>
-									<option value="2">Soporte Técnico</option>
-									<option value="3">Problema Conectividad</option>
+									<option value="<?php echo @($asunto); ?>">Seleccione...</option>
+									<?php foreach($servicios as $servicio): ?>
+							<option value=""><?php echo $servicio; ?></option>
+						<?php endforeach; ?>
+								</select><br>
+								<label>Indique Ejecutivo de su confianza</label><br>
+									<select name="ejecutivo" class="form-control" style="width: 50%">
+									<option value="<?php echo @($ejecutivo); ?>">Seleccione...</option>
+									<?php foreach($ejecutivos as $ejecutivo): ?>
+							<option value=""><?php echo $ejecutivo; ?></option>
+						<?php endforeach; ?>
 								</select><br>
 						    <label for="exampleInputEmail1">Comentario</label>
 						    <textarea type="email" class="form-control" name="comentario" 
 						           aria-describedby="emailHelp" placeholder="Indica asunto del correo"style="width: 50%;resize: none" rows="5" value="<?php echo @($comentario); ?>"></textarea><br>
-						    <button type="submit" class="btn btn-primary" name="enviar" value="si">Enviar</button>
+						    <button type="submit" class="btn btn-success" name="enviar" value="si">Enviar</button>
 						</div>
 					</form><br><br>
 					<p><h5>TELÉFONOS DE CONTACTO</h5></p>
